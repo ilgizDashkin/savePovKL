@@ -1,12 +1,12 @@
-import React, { Component, useState, useEffect, } from 'react';
+import React, { Component } from 'react';
 // import bridge from '@vkontakte/vk-bridge';
 // import View from '@vkontakte/vkui/dist/components/View/View';
 // import ScreenSpinner from '@vkontakte/vkui/dist/components/ScreenSpinner/ScreenSpinner';
 import '@vkontakte/vkui/dist/vkui.css';
-import { View, Panel, PanelHeader, FormLayout, File, Div, Button, Input, Spinner, CardGrid, Card } from '@vkontakte/vkui';//пакеты из вк
-import Icon24CameraOutline from '@vkontakte/icons/dist/24/camera_outline';
+import { View, Panel, PanelHeader, FormLayout, File, Button, Input, Spinner, CardGrid, Card } from '@vkontakte/vkui';//пакеты из вк
+import Icon24CameraOutline from '@vkontakte/icons/dist/24/camera_outline';//это из https://vkcom.github.io/icons/#24/smile
 import Icon24Send from '@vkontakte/icons/dist/24/send';
-
+// import Icon24Smile from '@vkontakte/icons/dist/24/smile';
 
 class App extends Component {
 	constructor(props) {
@@ -24,6 +24,7 @@ class App extends Component {
 	}
 
 	componentDidMount() {
+		//вызываем предыдущее состояние из локалсториджа
 		const lastState = localStorage.savepovkl
 		if (lastState) {
 			// console.log(lastState)
@@ -49,6 +50,7 @@ class App extends Component {
 			selectedFile: event.target.files			
 		})
 	}
+	//отправляем на сервер данные
 	onClickHandler = async () => {
 		const data = new FormData()
 		// data.append('foto1', this.state.selectedFile)
@@ -86,6 +88,7 @@ class App extends Component {
 					<PanelHeader>добавить привязку КЛ</PanelHeader>
 					<div className="container bg-dark text-center ">
 						<div className='container p-2'>
+						<a type="button" className="btn btn-danger btn-lg btn-block" href='https://ilgiz.h1n.ru/index.php'>на главную</a>
 							<FormLayout align="center">
 								<Input type="text" top="наименование КЛ" placeholder='введите название КЛ' align="center" value={this.state.nameKl} onChange={this.nameKlChange} />
 								<Input type="number" top="замер" placeholder='введите замер' align="center" value={this.state.zamer} onChange={this.zamerChange} />
