@@ -17,7 +17,9 @@ class App extends Component {
 			zamer: '',
 			where: '',
 			who: '',
-			selectedFile: null,
+			selectedFile1: null,
+			selectedFile2: null,
+			selectedFile3: null,
 			result_serv: null
 		}
 
@@ -44,22 +46,33 @@ class App extends Component {
 	whoChange = (event) => {
 		this.setState({ who: event.target.value.toUpperCase() });
 	}
-	onChangeHandler = event => {
+	onChangeHandler1 = event => {
 		// console.log(event.target.files[0])
 		this.setState({
-			selectedFile: event.target.files			
+			selectedFile1: event.target.files[0]
+		})
+	}
+	onChangeHandler2 = event => {
+		// console.log(event.target.files[0])
+		this.setState({
+			selectedFile2: event.target.files[0]
+		})
+	}
+	onChangeHandler3 = event => {
+		// console.log(event.target.files[0])
+		this.setState({
+			selectedFile3: event.target.files[0]
 		})
 	}
 	//отправляем на сервер данные
 	onClickHandler = async () => {
 		const data = new FormData()
 		// data.append('foto1', this.state.selectedFile)
-		if ((this.state.selectedFile) && (this.state.selectedFile.length <= 3)) {
-			this.setState({ isLoading: true }) //пока грузится показываем спинер
-			for (let x = 1; x <= this.state.selectedFile.length; x++) {
-				data.append('foto' + x, this.state.selectedFile[x - 1])
-			}
-			// data.append('foto1', this.state.selectedFile[0])
+		if ((this.state.selectedFile1) || (this.state.selectedFile2) || (this.state.selectedFile3)) {
+			this.setState({ isLoading: true }) //пока грузится показываем спинер			
+			if (this.state.selectedFile1) { data.append('foto1', this.state.selectedFile1) }
+			if (this.state.selectedFile2) { data.append('foto2', this.state.selectedFile2) }
+			if (this.state.selectedFile3) { data.append('foto3', this.state.selectedFile3) }
 			data.append('name', this.state.nameKl)
 			data.append('zamer', this.state.zamer)
 			data.append('otkuda', this.state.where)
@@ -88,23 +101,21 @@ class App extends Component {
 					<PanelHeader>добавить привязку КЛ</PanelHeader>
 					<div className="container bg-dark text-center ">
 						<div className='container p-2'>
-						<a type="button" className="btn btn-danger btn-lg btn-block" href='https://ilgiz.h1n.ru/index.php'>на главную</a>
+							<a type="button" className="btn btn-danger btn-lg btn-block" href='https://ilgiz.h1n.ru/index.php'>на главную</a>
 							<FormLayout align="center">
 								<Input type="text" top="наименование КЛ" placeholder='введите название КЛ' align="center" value={this.state.nameKl} onChange={this.nameKlChange} />
 								<Input type="number" top="замер" placeholder='введите замер' align="center" value={this.state.zamer} onChange={this.zamerChange} />
 								<Input type="text" top="откуда замер" placeholder='введите откуда замер' align="center" value={this.state.where} onChange={this.whereChange} />
 								<Input type="text" top="кто искал" placeholder='введите кто искал' align="center" value={this.state.who} onChange={this.whoChange} />
-								<File multiple onChange={this.onChangeHandler} top="фото места повреждения" before={<Icon24CameraOutline />} size="l">
-									можно выбрать не более 3-х фото
-                                </File>
-								<p className=" text-white">
-									количество выбранных фото:
-									{
-										this.state.selectedFile ?
-											(this.state.selectedFile.length > 3 ? <span className='bg-danger'> больше 3</span> : ` ${this.state.selectedFile.length||''}`)
-											: null
-									}
-								</p>
+								<File onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
+									фото 1  {this.state.selectedFile1 ? this.state.selectedFile1.name : 'не выбрано'}
+								</File>
+								<File onChange={this.onChangeHandler2} before={<Icon24CameraOutline />} size="l">
+									фото 3  {this.state.selectedFile2 ? this.state.selectedFile2.name : 'не выбрано'}
+								</File>
+								<File onChange={this.onChangeHandler3} before={<Icon24CameraOutline />} size="l">
+									фото 3  {this.state.selectedFile3 ? this.state.selectedFile3.name : 'не выбрано'}
+								</File>
 								<Button onClick={this.onClickHandler} before={<Icon24Send />} size="l">отправить</Button>
 								{
 									this.state.isLoading ?
