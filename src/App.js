@@ -3,10 +3,11 @@ import React, { Component } from 'react';
 // import View from '@vkontakte/vkui/dist/components/View/View';
 // import ScreenSpinner from '@vkontakte/vkui/dist/components/ScreenSpinner/ScreenSpinner';
 import '@vkontakte/vkui/dist/vkui.css';
-import { View, Panel, PanelHeader, FormLayout, File, Button, Input, Spinner, CardGrid, Card } from '@vkontakte/vkui';//пакеты из вк
+import { View, Panel, PanelHeader, FormLayout, File, Button, Input, Spinner, CardGrid, Card,Div } from '@vkontakte/vkui';//пакеты из вк
 import Icon24CameraOutline from '@vkontakte/icons/dist/24/camera_outline';//это из https://vkcom.github.io/icons/#24/smile
 import Icon24Send from '@vkontakte/icons/dist/24/send';
 // import Icon24Smile from '@vkontakte/icons/dist/24/smile';
+import Icon24View from '@vkontakte/icons/dist/24/view';
 
 class App extends Component {
 	constructor(props) {
@@ -25,14 +26,14 @@ class App extends Component {
 
 	}
 
-	componentDidMount() {
-		//вызываем предыдущее состояние из локалсториджа
-		const lastState = localStorage.savepovkl
-		if (lastState) {
-			// console.log(lastState)
-			this.setState(JSON.parse(lastState))
-		}
-	}
+	// componentDidMount() {
+	// 	//вызываем предыдущее состояние из локалсториджа
+	// 	// const lastState = localStorage.savepovkl
+	// 	// if (lastState) {
+	// 	// 	// console.log(lastState)
+	// 	// 	this.setState(JSON.parse(lastState))
+	// 	// }
+	// }
 	//обязательно используем стрелочные фунции чтоб не прописывать методы в конструкторе
 	nameKlChange = (event) => {
 		this.setState({ nameKl: event.target.value.toUpperCase() });
@@ -88,7 +89,7 @@ class App extends Component {
 				result_serv: result,
 			})
 			// console.log(result);
-			localStorage.savepovkl = JSON.stringify(this.state);//сохраняем стейт в локалсторадже
+			// localStorage.savepovkl = JSON.stringify(this.state);//сохраняем стейт в локалсторадже
 		} else {
 			alert('пожалуйста выберите от 1 до 3 фото')
 		}
@@ -107,16 +108,28 @@ class App extends Component {
 								<Input type="number" top="замер" placeholder='введите замер' align="center" value={this.state.zamer} onChange={this.zamerChange} />
 								<Input type="text" top="откуда замер" placeholder='введите откуда замер' align="center" value={this.state.where} onChange={this.whereChange} />
 								<Input type="text" top="кто искал" placeholder='введите кто искал' align="center" value={this.state.who} onChange={this.whoChange} />
-								<File onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
+								<Div style={{ display: 'flex' }}>
+								<File stretched onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
 									фото 1  {this.state.selectedFile1 ? this.state.selectedFile1.name : 'не выбрано'}
 								</File>
-								<File onChange={this.onChangeHandler2} before={<Icon24CameraOutline />} size="l">
-									фото 3  {this.state.selectedFile2 ? this.state.selectedFile2.name : 'не выбрано'}
+								</Div>
+								
+								<Div style={{ display: 'flex' }}>
+								<File stretched onChange={this.onChangeHandler2} before={<Icon24CameraOutline />} size="l">
+									фото 2  {this.state.selectedFile2 ? this.state.selectedFile2.name : 'не выбрано'}
 								</File>
-								<File onChange={this.onChangeHandler3} before={<Icon24CameraOutline />} size="l">
+								</Div>
+								
+								<Div style={{ display: 'flex' }}>
+								<File stretched onChange={this.onChangeHandler3} before={<Icon24CameraOutline />} size="l">
 									фото 3  {this.state.selectedFile3 ? this.state.selectedFile3.name : 'не выбрано'}
 								</File>
-								<Button onClick={this.onClickHandler} before={<Icon24Send />} size="l">отправить</Button>
+								</Div>
+								
+								<Div style={{ display: 'flex' }}>
+								<Button stretched onClick={this.onClickHandler} before={<Icon24Send />} size="l">отправить</Button>
+								</Div>
+								
 								{
 									this.state.isLoading ?
 										<div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
@@ -132,6 +145,14 @@ class App extends Component {
 														null
 												}
 											</Card>
+											{
+											this.state.result_serv ?
+											// true?
+											<Div style={{ display: 'flex' }}>
+											<Button onClick={this.prevView} stretched before={<Icon24View />} size="l" href='https://ilgiz.h1n.ru/smotrnewpov/index.html'>галерея</Button>
+											</Div>:
+											null
+											}
 										</CardGrid>
 								}
 							</FormLayout>
