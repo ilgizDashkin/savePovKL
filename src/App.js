@@ -8,7 +8,7 @@ import Icon24CameraOutline from '@vkontakte/icons/dist/24/camera_outline';//эт
 import Icon24Send from '@vkontakte/icons/dist/24/send';
 // import Icon24Smile from '@vkontakte/icons/dist/24/smile';
 import Icon24View from '@vkontakte/icons/dist/24/view';
-import Compressor from 'compressorjs';
+// import Compressor from 'compressorjs';//так и не удалось довести до ума
 
 class App extends Component {
 	constructor(props) {
@@ -27,14 +27,15 @@ class App extends Component {
 
 	}
 
-	// componentDidMount() {
-	// 	//вызываем предыдущее состояние из локалсториджа
-	// 	// const lastState = localStorage.savepovkl
-	// 	// if (lastState) {
-	// 	// 	// console.log(lastState)
-	// 	// 	this.setState(JSON.parse(lastState))
-	// 	// }
-	// }
+	componentDidMount() {
+		//вызываем предыдущее состояние из локалсториджа
+		const lastState = localStorage.savepovkl
+		if (lastState) {
+			// console.log(lastState)
+			this.setState({who:JSON.parse(lastState)})
+		}
+	}
+
 	//обязательно используем стрелочные фунции чтоб не прописывать методы в конструкторе
 	nameKlChange = (event) => {
 		this.setState({ nameKl: event.target.value.toUpperCase() });
@@ -73,30 +74,8 @@ class App extends Component {
 		if ((this.state.selectedFile1) || (this.state.selectedFile2) || (this.state.selectedFile3)) {
 			this.setState({ isLoading: true }) //пока грузится показываем спинер			
 			if (this.state.selectedFile1) { data.append('foto1', this.state.selectedFile1) }
-			// if (this.state.selectedFile2) { data.append('foto2', this.state.selectedFile2) }
-			// if (this.state.selectedFile3) { data.append('foto3', this.state.selectedFile3) }
-			if (this.state.selectedFile2) {
-			new Compressor(this.state.selectedFile2, {
-				quality: 0.6,
-				success(result) {
-				  
-				  // The third parameter is required for server
-				  data.append('foto2', result);
-			
-				//   // Send the compressed image file to server with XMLHttpRequest.
-				//   axios.post('/path/to/upload', formData).then(() => {
-				// 	console.log('Upload success');
-				//   });
-				},
-				error(err) {
-				  console.log(err.message);
-				},
-			  });
-			}
-
-
-
-
+			if (this.state.selectedFile2) { data.append('foto2', this.state.selectedFile2) }
+			if (this.state.selectedFile3) { data.append('foto3', this.state.selectedFile3) }		
 			data.append('name', this.state.nameKl)
 			data.append('zamer', this.state.zamer)
 			data.append('otkuda', this.state.where)
@@ -112,7 +91,7 @@ class App extends Component {
 				result_serv: result,
 			})
 			// console.log(result);
-			// localStorage.savepovkl = JSON.stringify(this.state);//сохраняем стейт в локалсторадже
+			localStorage.savepovkl = JSON.stringify(this.state.who);//сохраняем who в локалсторадже
 		} else {
 			alert('пожалуйста выберите от 1 до 3 фото')
 		}
@@ -133,7 +112,7 @@ class App extends Component {
 								<Input type="text" top="кто искал" placeholder='введите кто искал' align="center" value={this.state.who} onChange={this.whoChange} />
 								<Div style={{ display: 'flex' }}>
 								<File accept="image/*" stretched onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
-									фото 1  {this.state.selectedFile1 ? this.state.selectedFile1.name : 'не выбрано'}
+									фото 1 (с геотегами) {this.state.selectedFile1 ? this.state.selectedFile1.name : 'не выбрано'}
 								</File>
 								</Div>
 								
