@@ -3,12 +3,12 @@ import React, { Component } from 'react';
 // import View from '@vkontakte/vkui/dist/components/View/View';
 // import ScreenSpinner from '@vkontakte/vkui/dist/components/ScreenSpinner/ScreenSpinner';
 import '@vkontakte/vkui/dist/vkui.css';
-import { View, Panel, PanelHeader, FormLayout, File, Button, Input, Spinner, CardGrid, Card,Div } from '@vkontakte/vkui';//пакеты из вк
+import { View, Panel, PanelHeader, FormLayout, File, Button, Input, Spinner, CardGrid, Card, Div } from '@vkontakte/vkui';//пакеты из вк
 import Icon24CameraOutline from '@vkontakte/icons/dist/24/camera_outline';//это из https://vkcom.github.io/icons/#24/smile
 import Icon24Send from '@vkontakte/icons/dist/24/send';
 // import Icon24Smile from '@vkontakte/icons/dist/24/smile';
 import Icon24View from '@vkontakte/icons/dist/24/view';
-// import Compressor from 'compressorjs';//так и не удалось довести до ума
+import Compressor from 'compressorjs';//так и не удалось довести до ума нужны промисы
 
 class App extends Component {
 	constructor(props) {
@@ -22,7 +22,8 @@ class App extends Component {
 			selectedFile1: null,
 			selectedFile2: null,
 			selectedFile3: null,
-			result_serv: null
+			result_serv: null,
+			file2:null
 		}
 
 	}
@@ -32,7 +33,7 @@ class App extends Component {
 		const lastState = localStorage.savepovkl
 		if (lastState) {
 			// console.log(lastState)
-			this.setState({who:JSON.parse(lastState)})
+			this.setState({ who: JSON.parse(lastState) })
 		}
 	}
 
@@ -69,29 +70,67 @@ class App extends Component {
 	}
 	//отправляем на сервер данные
 	onClickHandler = async () => {
+		// let mass=[]//сделал для проверки
 		const data = new FormData()
 		// data.append('foto1', this.state.selectedFile)
 		if ((this.state.selectedFile1) || (this.state.selectedFile2) || (this.state.selectedFile3)) {
 			this.setState({ isLoading: true }) //пока грузится показываем спинер			
-			if (this.state.selectedFile1) { data.append('foto1', this.state.selectedFile1) }
-			if (this.state.selectedFile2) { data.append('foto2', this.state.selectedFile2) }
-			if (this.state.selectedFile3) { data.append('foto3', this.state.selectedFile3) }		
-			data.append('name', this.state.nameKl)
-			data.append('zamer', this.state.zamer)
-			data.append('otkuda', this.state.where)
-			data.append('kto', this.state.who)
-			let response = await fetch('https://ilgiz.h1n.ru/savepovkl.php', {
-				method: 'POST',
-				body: data
-			});
+			if (this.state.selectedFile1) { data.append('foto1', this.state.selectedFile1) }//отправляем без сжатия для вывода gps из фото
+			// if (this.state.selectedFile2) { data.append('foto2', this.state.selectedFile2) }
+			// if (this.state.selectedFile3) { data.append('foto3', this.state.selectedFile3) }	
 
-			let result = await response.json()
-			this.setState({
-				isLoading: false,
-				result_serv: result,
-			})
-			// console.log(result);
-			localStorage.savepovkl = JSON.stringify(this.state.who);//сохраняем who в локалсторадже
+			if (this.state.selectedFile2) {
+				// сжимаем фото2 и добавляем в форму 
+				new Compressor(this.state.selectedFile2, {
+					quality: 0.6,
+					maxWidth: 1600,
+					maxHeight: 1600,
+					success(result) {
+						// console.log(result)
+						let reader = new FileReader();
+						reader.readAsDataURL(result);
+						reader.onloadend = function () {
+							let base64data = reader.result;
+							data.append('foto2', base64data)
+							// mass.push(base64data)			
+						}
+					},
+				});
+			}
+			if (this.state.selectedFile3) {
+				new Compressor(this.state.selectedFile3, {
+					quality: 0.6,
+					maxWidth: 1600,
+					maxHeight: 1600,
+					success(result) {
+						let reader = new FileReader();
+						reader.readAsDataURL(result);
+						reader.onloadend = function () {
+							let base64data = reader.result;
+							data.append('foto3', base64data)
+						}
+					},
+				});
+			}
+			// setTimeout(()=>console.log(mass[0]),1000) ;
+			setTimeout(async () => {
+				data.append('name', this.state.nameKl)
+				data.append('zamer', this.state.zamer)
+				data.append('otkuda', this.state.where)
+				data.append('kto', this.state.who)
+				let response = await fetch('https://ilgiz.h1n.ru/savepovkl1.php', {
+					method: 'POST',
+					body: data
+				});
+
+				let result = await response.json()
+				this.setState({
+					isLoading: false,
+					result_serv: result,
+				})
+				// console.log(result);
+				localStorage.savepovkl = JSON.stringify(this.state.who);//сохраняем who в локалсторадже
+			}, 2000)//ждем 2сек пока сжимаются фото и передаем
 		} else {
 			alert('пожалуйста выберите от 1 до 3 фото')
 		}
@@ -111,27 +150,27 @@ class App extends Component {
 								<Input type="text" top="откуда замер" placeholder='введите откуда замер' align="center" value={this.state.where} onChange={this.whereChange} />
 								<Input type="text" top="кто искал" placeholder='введите кто искал' align="center" value={this.state.who} onChange={this.whoChange} />
 								<Div style={{ display: 'flex' }}>
-								<File accept="image/*" stretched onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
-									фото 1 (с геотегами) {this.state.selectedFile1 ? this.state.selectedFile1.name : 'не выбрано'}
-								</File>
+									<File accept="image/*" stretched onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
+										фото 1 (с геотегами) {this.state.selectedFile1 ? this.state.selectedFile1.name : 'не выбрано'}
+									</File>
 								</Div>
-								
+
 								<Div style={{ display: 'flex' }}>
-								<File accept="image/*" stretched onChange={this.onChangeHandler2} before={<Icon24CameraOutline />} size="l">
-									фото 2  {this.state.selectedFile2 ? this.state.selectedFile2.name : 'не выбрано'}
-								</File>
+									<File accept="image/*" stretched onChange={this.onChangeHandler2} before={<Icon24CameraOutline />} size="l">
+										фото 2  {this.state.selectedFile2 ? this.state.selectedFile2.name : 'не выбрано'}
+									</File>
 								</Div>
-								
+
 								<Div style={{ display: 'flex' }}>
-								<File accept="image/*" stretched onChange={this.onChangeHandler3} before={<Icon24CameraOutline />} size="l">
-									фото 3  {this.state.selectedFile3 ? this.state.selectedFile3.name : 'не выбрано'}
-								</File>
+									<File accept="image/*" stretched onChange={this.onChangeHandler3} before={<Icon24CameraOutline />} size="l">
+										фото 3  {this.state.selectedFile3 ? this.state.selectedFile3.name : 'не выбрано'}
+									</File>
 								</Div>
-								
+
 								<Div style={{ display: 'flex' }}>
-								<Button stretched onClick={this.onClickHandler} before={<Icon24Send />} size="l">отправить</Button>
+									<Button stretched onClick={this.onClickHandler} before={<Icon24Send />} size="l">отправить</Button>
 								</Div>
-								
+
 								{
 									this.state.isLoading ?
 										<div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
@@ -148,12 +187,12 @@ class App extends Component {
 												}
 											</Card>
 											{
-											this.state.result_serv ?
-											// true?
-											<Div style={{ display: 'flex' }}>
-											<Button onClick={this.prevView} stretched before={<Icon24View />} size="l" href='https://ilgiz.h1n.ru/smotrnewpov/index.html'>галерея</Button>
-											</Div>:
-											null
+												this.state.result_serv ?
+													// true?
+													<Div style={{ display: 'flex' }}>
+														<Button onClick={this.prevView} stretched before={<Icon24View />} size="l" href='https://ilgiz.h1n.ru/smotrnewpov/index.html'>галерея</Button>
+													</Div> :
+													null
 											}
 										</CardGrid>
 								}
