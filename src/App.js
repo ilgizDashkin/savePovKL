@@ -1,14 +1,10 @@
 import React, { Component } from 'react';
-// import bridge from '@vkontakte/vk-bridge';
-// import View from '@vkontakte/vkui/dist/components/View/View';
-// import ScreenSpinner from '@vkontakte/vkui/dist/components/ScreenSpinner/ScreenSpinner';
 import '@vkontakte/vkui/dist/vkui.css';
 import { View, Panel, PanelHeader, FormLayout, File, Button, Input, Spinner, CardGrid, Card, Div } from '@vkontakte/vkui';//пакеты из вк
 import Icon24CameraOutline from '@vkontakte/icons/dist/24/camera_outline';//это из https://vkcom.github.io/icons/#24/smile
 import Icon24Send from '@vkontakte/icons/dist/24/send';
-// import Icon24Smile from '@vkontakte/icons/dist/24/smile';
 import Icon24View from '@vkontakte/icons/dist/24/view';
-import Compressor from 'compressorjs';//так и не удалось довести до ума нужны промисы
+import Compressor from 'compressorjs';
 
 class App extends Component {
 	constructor(props) {
@@ -23,14 +19,14 @@ class App extends Component {
 			selectedFile2: null,
 			selectedFile3: null,
 			result_serv: null,
-			file2:null
+			file2: null
 		}
 
 	}
 
 	componentDidMount() {
 		//вызываем предыдущее состояние из локалсториджа
-		const lastState = localStorage.savepovkl
+		const lastState = localStorage.savepovkl1
 		if (lastState) {
 			// console.log(lastState)
 			this.setState({ who: JSON.parse(lastState) })
@@ -70,50 +66,43 @@ class App extends Component {
 	}
 	//отправляем на сервер данные
 	onClickHandler = async () => {
-		// let mass=[]//сделал для проверки
 		const data = new FormData()
 		// data.append('foto1', this.state.selectedFile)
 		if ((this.state.selectedFile1) || (this.state.selectedFile2) || (this.state.selectedFile3)) {
 			this.setState({ isLoading: true }) //пока грузится показываем спинер			
-			if (this.state.selectedFile1) { data.append('foto1', this.state.selectedFile1) }//отправляем без сжатия для вывода gps из фото
+			// if (this.state.selectedFile1) { data.append('foto1', this.state.selectedFile1) }//отправляем без сжатия для вывода gps из фото
 			// if (this.state.selectedFile2) { data.append('foto2', this.state.selectedFile2) }
 			// if (this.state.selectedFile3) { data.append('foto3', this.state.selectedFile3) }	
 
-			if (this.state.selectedFile2) {
-				// сжимаем фото2 и добавляем в форму 
-				new Compressor(this.state.selectedFile2, {
-					quality: 0.6,
-					maxWidth: 1600,
-					maxHeight: 1600,
-					success(result) {
-						// console.log(result)
-						let reader = new FileReader();
-						reader.readAsDataURL(result);
-						reader.onloadend = function () {
-							let base64data = reader.result;
-							data.append('foto2', base64data)
-							// mass.push(base64data)			
-						}
-					},
-				});
-			}
-			if (this.state.selectedFile3) {
-				new Compressor(this.state.selectedFile3, {
-					quality: 0.6,
-					maxWidth: 1600,
-					maxHeight: 1600,
-					success(result) {
-						let reader = new FileReader();
-						reader.readAsDataURL(result);
-						reader.onloadend = function () {
-							let base64data = reader.result;
-							data.append('foto3', base64data)
-						}
-					},
-				});
-			}
-			// setTimeout(()=>console.log(mass[0]),1000) ;
-			setTimeout(async () => {
+			function compressFoto(file, fileName) {
+				// сжимаем фото2 и добавляем в форму с помощью промисов
+				return new Promise((resolve, reject) => {
+					new Compressor(file, {
+						quality: 0.6,
+						maxWidth: 1600,
+						maxHeight: 1600,
+						success(result) {
+							let reader = new FileReader();
+							reader.readAsDataURL(result);//результат сжатия считываем в басе64 строку
+							reader.onloadend = function () {
+								let base64data = reader.result;//result будет содержать данные как URL, представляющий файл, кодированый в base64 строку
+								data.append(fileName, base64data)//добавляем в форму
+								resolve(`Compress success ${fileName}`);//выводим в случае успеха
+								reject(`Compress error ${fileName}`)//выводим в случае неудачи
+							}
+						},
+					});
+				}).then(
+					response => console.log(`фото сжали добавили в FormData(): ${response}`),
+					error => console.log(`не удалось сжать фото: ${error}`)
+				);
+			};
+
+			Promise.all([
+				compressFoto(this.state.selectedFile1, 'foto1'),
+				compressFoto(this.state.selectedFile2, 'foto2'),
+				compressFoto(this.state.selectedFile3, 'foto3')
+			]).finally(async () => {//после запуска всех промисов с фото добавляем оставшиеся данные и отправляем н сервер
 				data.append('name', this.state.nameKl)
 				data.append('zamer', this.state.zamer)
 				data.append('otkuda', this.state.where)
@@ -124,13 +113,14 @@ class App extends Component {
 				});
 
 				let result = await response.json()
+				// let result = await response.text()
 				this.setState({
 					isLoading: false,
 					result_serv: result,
 				})
 				// console.log(result);
-				localStorage.savepovkl = JSON.stringify(this.state.who);//сохраняем who в локалсторадже
-			}, 2000)//ждем 2сек пока сжимаются фото и передаем
+				localStorage.savepovkl1 = JSON.stringify(this.state.who);//сохраняем кто искал в локалсторадже
+			});
 		} else {
 			alert('пожалуйста выберите от 1 до 3 фото')
 		}

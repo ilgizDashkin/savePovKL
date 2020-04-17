@@ -14,9 +14,9 @@ if (isset($_POST['name'])) {
     $zamer = htmlentities(mysqli_real_escape_string($link, $_POST['zamer']));
     $otkuda = htmlentities(mysqli_real_escape_string($link, $_POST['otkuda']));
     $priv = htmlentities(mysqli_real_escape_string($link, $_POST['priv']));
-    $dlinna = htmlentities(mysqli_real_escape_string($link, $_POST['dlinna']));   
+    $dlinna = htmlentities(mysqli_real_escape_string($link, $_POST['dlinna']));
     $kto = htmlentities(mysqli_real_escape_string($link, $_POST['kto']));
-   
+
     //file
     if ($_FILES && $_FILES['foto1']['error'] == UPLOAD_ERR_OK && $_FILES['foto1']['name'] != '') {
         $name_foto1 = 'foto/' . $_FILES['foto1']['name'];
@@ -183,6 +183,9 @@ if (isset($_POST['name'])) {
             $json['file1geo'] = "Нет геотегов в фото $gps . ";
         }
         //конец скрипта по извлечению gps
+    } else {
+        $json['file1'] = "Файл 1 не загружен. ";
+        $json['file1geo'] = "Нет геотегов в фото1. ";
     }
 
     //   if ($_FILES && $_FILES['foto2']['error']== UPLOAD_ERR_OK && $_FILES['foto2']['name']!= '')
@@ -193,7 +196,7 @@ if (isset($_POST['name'])) {
     //     // echo "Файл 2 загружен. ";
     //     $json['file2']="Файл 2 загружен. ";
     // } 
-     //   if ($_FILES && $_FILES['foto3']['error']== UPLOAD_ERR_OK && $_FILES['foto3']['name']!= '')
+    //   if ($_FILES && $_FILES['foto3']['error']== UPLOAD_ERR_OK && $_FILES['foto3']['name']!= '')
     // {
     // это если присылаем в виде файла изображения
     //     $name_foto3 = 'foto/'.$_FILES['foto3']['name'];
@@ -207,12 +210,16 @@ if (isset($_POST['name'])) {
         $name_foto2 = str_replace(' ', '', 'foto/' . date("Y-m-d-H-i") . $_POST['name'] . '_foto2.jpg'); //место где сохраним
         file_put_contents($name_foto2, file_get_contents($_POST['foto2']));
         $json['file2'] = "Файл 2 загружен. ";
+    } else {
+        $json['file2'] = "Файл 2 не загружен. ";
     }
 
     if (!empty($_POST['foto3'])) {
         $name_foto3 = str_replace(' ', '', 'foto/' . date("Y-m-d-H-i") . $_POST['name'] . '_foto3.jpg');
         file_put_contents($name_foto3, file_get_contents($_POST['foto3']));
         $json['file3'] = "Файл 3 загружен. ";
+    } else {
+        $json['file3'] = "Файл 3 не загружен. ";
     }
 
     //fileend 
