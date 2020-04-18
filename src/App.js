@@ -20,7 +20,6 @@ class App extends Component {
 			selectedFile2: null,
 			selectedFile3: null,
 			result_serv: null,
-			file2: null
 		}
 
 	}
