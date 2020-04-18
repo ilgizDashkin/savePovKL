@@ -5,6 +5,7 @@ import Icon24CameraOutline from '@vkontakte/icons/dist/24/camera_outline';//эт
 import Icon24Send from '@vkontakte/icons/dist/24/send';
 import Icon24View from '@vkontakte/icons/dist/24/view';
 import Compressor from 'compressorjs';
+import Exif from 'exif-js'
 
 class App extends Component {
 	constructor(props) {
@@ -67,12 +68,59 @@ class App extends Component {
 	//отправляем на сервер данные
 	onClickHandler = async () => {
 		const data = new FormData()
-		// data.append('foto1', this.state.selectedFile)
 		if ((this.state.selectedFile1) || (this.state.selectedFile2) || (this.state.selectedFile3)) {
 			this.setState({ isLoading: true }) //пока грузится показываем спинер			
 			// if (this.state.selectedFile1) { data.append('foto1', this.state.selectedFile1) }//отправляем без сжатия для вывода gps из фото
 			// if (this.state.selectedFile2) { data.append('foto2', this.state.selectedFile2) }
 			// if (this.state.selectedFile3) { data.append('foto3', this.state.selectedFile3) }	
+
+			function getExifFoto(file_foto1) {
+				// ищем координаты в фото
+				return new Promise((resolve, reject) => {
+					Exif.getData(file_foto1, function () {
+						const allMetaData = Exif.getAllTags(this);
+						// console.log(allMetaData)//вывод всех данных из фото
+
+						function ConvertDMSToDD(degrees, minutes, seconds, direction) {
+							// приводим координаты к десятичному виду
+							let dd = degrees + (minutes / 60) + (seconds / 3600);
+							if (direction === "S" || direction === "W") {
+								dd = dd * -1;
+							}
+							return dd;
+						}
+
+						const latDegree = allMetaData.GPSLatitude[0];
+						const latMinute = allMetaData.GPSLatitude[1];
+						const latSecond = allMetaData.GPSLatitude[2];
+						const latDirection = allMetaData.GPSLatitudeRef;
+
+						const latFinal = ConvertDMSToDD(latDegree, latMinute, latSecond, latDirection);
+						// console.log(latFinal);
+
+						// Calculate longitude decimal
+						const lonDegree = allMetaData.GPSLongitude[0];
+						const lonMinute = allMetaData.GPSLongitude[1];
+						const lonSecond = allMetaData.GPSLongitude[2];
+						const lonDirection = allMetaData.GPSLongitudeRef;
+
+						const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
+						// console.log(lonFinal);
+						let dateStamp=''
+						if (allMetaData.DateTime){
+							dateStamp = allMetaData.DateTime.slice(0, 10)//возьмем 10 символов из даты
+							data.append('date', dateStamp)//добавляем в форму
+						}						
+						data.append('gps', `${latFinal},${lonFinal}`)//добавляем в форму
+
+						resolve(`Gps data ${latFinal},${lonFinal}, dateStamp ${dateStamp}`);//выводим в случае успеха
+						reject(`Gps data error `)//выводим в случае неудачи
+					});
+				}).then(
+					response => console.log(`Exif : ${response}`),
+					error => console.log(`Not Exif: ${error}`)
+				);
+			}
 
 			function compressFoto(file, fileName) {
 				// сжимаем фото2 и добавляем в форму с помощью промисов
@@ -99,6 +147,7 @@ class App extends Component {
 			};
 
 			Promise.all([
+				getExifFoto(this.state.selectedFile1),
 				compressFoto(this.state.selectedFile1, 'foto1'),
 				compressFoto(this.state.selectedFile2, 'foto2'),
 				compressFoto(this.state.selectedFile3, 'foto3')
@@ -113,7 +162,7 @@ class App extends Component {
 				});
 
 				let result = await response.json()
-				// let result = await response.text()
+				// let result = await response.text()//если ошибка можно глянуть в тексте ответа
 				this.setState({
 					isLoading: false,
 					result_serv: result,
@@ -140,19 +189,19 @@ class App extends Component {
 								<Input type="text" top="откуда замер" placeholder='введите откуда замер' align="center" value={this.state.where} onChange={this.whereChange} />
 								<Input type="text" top="кто искал" placeholder='введите кто искал' align="center" value={this.state.who} onChange={this.whoChange} />
 								<Div style={{ display: 'flex' }}>
-									<File accept="image/*" stretched onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
+									<File  stretched onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
 										фото 1 (с геотегами) {this.state.selectedFile1 ? this.state.selectedFile1.name : 'не выбрано'}
 									</File>
 								</Div>
 
 								<Div style={{ display: 'flex' }}>
-									<File accept="image/*" stretched onChange={this.onChangeHandler2} before={<Icon24CameraOutline />} size="l">
+									<File  stretched onChange={this.onChangeHandler2} before={<Icon24CameraOutline />} size="l">
 										фото 2  {this.state.selectedFile2 ? this.state.selectedFile2.name : 'не выбрано'}
 									</File>
 								</Div>
 
 								<Div style={{ display: 'flex' }}>
-									<File accept="image/*" stretched onChange={this.onChangeHandler3} before={<Icon24CameraOutline />} size="l">
+									<File  stretched onChange={this.onChangeHandler3} before={<Icon24CameraOutline />} size="l">
 										фото 3  {this.state.selectedFile3 ? this.state.selectedFile3.name : 'не выбрано'}
 									</File>
 								</Div>
