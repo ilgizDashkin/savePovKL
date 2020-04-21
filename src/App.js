@@ -246,7 +246,7 @@ class App extends Component {
 													<div>
 														<Div style={{ display: 'flex' }}>
 															{/* <Button onClick={this.prevView} stretched before={<Icon24View />} size="l" href='https://ilgiz.h1n.ru/smotrnewpov/index.html'>галерея</Button> */}
-															<Button onClick={this.prevView} stretched before={<Icon24View />} size="l" href={`https://ilgiz.h1n.ru/search_new_from_id.php?query=${this.state.result_serv.id}`} >посмотреть</Button>
+															<Button onClick={this.prevView} stretched before={<Icon24View />} size="l" href={`https://ilgiz.h1n.ru/search_new_from_id.php?query=${this.state.result_serv.id}`} >просмотр</Button>
 															<Button onClick={this.prevView} stretched before={<Icon28MessageAddBadgeOutline />} size="l" href={`https://wa.me/?text=https://ilgiz.h1n.ru/search_new_from_id.php?query=${this.state.result_serv.id}`} >отправить WhatsApp</Button>
 														</Div>
 														<p>(если случайно нажал "очистить всё" просто закрой и открой приложение заново)</p>
