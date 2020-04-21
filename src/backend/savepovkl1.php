@@ -21,7 +21,7 @@ if (isset($_POST['name'])) {
 
     if (!empty($_POST['gps'])) {
         $json['file1exif'] =  "Изображение содержит заголовки в фото1 . ";
-        $json['file1geo'] = "координаты ".$_POST['gps'].". ";
+        $json['file1geo'] = "координаты " . $_POST['gps'] . ". ";
     } else {
         $json['file1exif'] =  "Не найдено данных заголовка в фото1 . ";
         $json['file1geo'] = "Нет геотегов в фото1. ";
@@ -61,10 +61,20 @@ if (isset($_POST['name'])) {
 
     // выполняем запрос
     $result = mysqli_query($link, $query) or die("Ошибка " . mysqli_error($link));
+    //если получится записать
     if ($result) {
-        // echo "Спасибо ваша привязка КЛ $name добавлена! ";
-
-        $json['name'] = $name;
+        $result2 = mysqli_insert_id($link); //спрашиваем у бд какая последняя id у записи
+        if ($result2) {
+            // echo "Спасибо ваша привязка КЛ $name добавлена! ";
+            $json['name'] = $name;
+            $json['id'] = $result2; //отправляем id записи привязки
+            echo json_encode($json); //отправляем ответ от сервер в json
+        }
+    } else {
+        $json['name'] = "не ";
+        $json['file1'] = "Файл 1 не загружен. ";
+        $json['file2'] = "Файл 2 не загружен. ";
+        $json['file3'] = "Файл 3 не загружен. ";
         echo json_encode($json); //отправляем ответ от сервер в json
     }
     // закрываем подключение

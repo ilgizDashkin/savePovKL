@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import '@vkontakte/vkui/dist/vkui.css';
-import { View, Panel, PanelHeader, FormLayout, File, Button, Input, Spinner, CardGrid, Card, Div } from '@vkontakte/vkui';//пакеты из вк
+import { View, Panel, PanelHeader, FormLayout, File, Button, Input, Spinner, CardGrid, Card, Div, Textarea } from '@vkontakte/vkui';//пакеты из вк
 import Icon24CameraOutline from '@vkontakte/icons/dist/24/camera_outline';//это из https://vkcom.github.io/icons/#24/smile
 import Icon24Send from '@vkontakte/icons/dist/24/send';
 import Icon24View from '@vkontakte/icons/dist/24/view';
+import Icon28MessageAddBadgeOutline from '@vkontakte/icons/dist/28/message_add_badge_outline';
+import Icon28ClearDataOutline from '@vkontakte/icons/dist/28/clear_data_outline';
 import Compressor from 'compressorjs';
 import Exif from 'exif-js'
 
@@ -21,15 +23,15 @@ class App extends Component {
 			selectedFile3: null,
 			result_serv: null,
 		}
-
 	}
 
 	componentDidMount() {
 		//вызываем предыдущее состояние из локалсториджа
-		const lastState = localStorage.savepovkl1
+		const lastState = localStorage.savepovkl2//1 место где нужно менять название хранилища, если меняеш содержание
 		if (lastState) {
 			// console.log(lastState)
-			this.setState({ who: JSON.parse(lastState) })
+			// this.setState({ who: JSON.parse(lastState) })
+			this.setState(JSON.parse(lastState))
 		}
 	}
 
@@ -62,6 +64,20 @@ class App extends Component {
 		// console.log(event.target.files[0])
 		this.setState({
 			selectedFile3: event.target.files[0]
+		})
+	}
+	onClear = event => {
+		// console.log(event.target.files[0])
+		this.setState({
+			isLoading: false,
+			nameKl: '',
+			zamer: '',
+			where: '',
+			who: '',
+			selectedFile1: null,
+			selectedFile2: null,
+			selectedFile3: null,
+			result_serv: null,
 		})
 	}
 	//отправляем на сервер данные
@@ -105,11 +121,11 @@ class App extends Component {
 
 						const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
 						// console.log(lonFinal);
-						let dateStamp=''
-						if (allMetaData.DateTime){
+						let dateStamp = ''
+						if (allMetaData.DateTime) {
 							dateStamp = allMetaData.DateTime.slice(0, 10)//возьмем 10 символов из даты
 							data.append('date', dateStamp)//добавляем в форму
-						}						
+						}
 						data.append('gps', `${latFinal},${lonFinal}`)//добавляем в форму
 
 						resolve(`Gps data ${latFinal},${lonFinal}, dateStamp ${dateStamp}`);//выводим в случае успеха
@@ -167,7 +183,7 @@ class App extends Component {
 					result_serv: result,
 				})
 				// console.log(result);
-				localStorage.savepovkl1 = JSON.stringify(this.state.who);//сохраняем кто искал в локалсторадже
+				localStorage.savepovkl2 = JSON.stringify(this.state);//2 место где нужно менять название хранилища, если меняеш содержание, сохраняем state в локалсторадже 
 			});
 		} else {
 			alert('пожалуйста выберите от 1 до 3 фото')
@@ -184,23 +200,23 @@ class App extends Component {
 							<a type="button" className="btn btn-danger btn-lg btn-block" href='https://ilgiz.h1n.ru/index.php'>на главную</a>
 							<FormLayout align="center">
 								<Input type="text" top="наименование КЛ" placeholder='введите название КЛ' align="center" value={this.state.nameKl} onChange={this.nameKlChange} />
-								<Input type="number" top="замер" placeholder='введите замер' align="center" value={this.state.zamer} onChange={this.zamerChange} />
-								<Input type="text" top="откуда замер" placeholder='введите откуда замер' align="center" value={this.state.where} onChange={this.whereChange} />
+								<Input type="number" top="замер, м" placeholder='введите замер' align="center" value={this.state.zamer} onChange={this.zamerChange} />
+								<Textarea type="text" top="откуда замер и привязка" placeholder='введите откуда замер и привязку' align="center" value={this.state.where} onChange={this.whereChange} />
 								<Input type="text" top="кто искал" placeholder='введите кто искал' align="center" value={this.state.who} onChange={this.whoChange} />
 								<Div style={{ display: 'flex' }}>
-									<File  stretched onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
+									<File stretched onChange={this.onChangeHandler1} top="(для определения координат не забудьте включить геотеги на камере телефона!)" before={<Icon24CameraOutline />} size="l">
 										фото 1 (с геотегами) {this.state.selectedFile1 ? this.state.selectedFile1.name : 'не выбрано'}
 									</File>
 								</Div>
 
 								<Div style={{ display: 'flex' }}>
-									<File  stretched onChange={this.onChangeHandler2} before={<Icon24CameraOutline />} size="l">
+									<File stretched onChange={this.onChangeHandler2} before={<Icon24CameraOutline />} size="l">
 										фото 2  {this.state.selectedFile2 ? this.state.selectedFile2.name : 'не выбрано'}
 									</File>
 								</Div>
 
 								<Div style={{ display: 'flex' }}>
-									<File  stretched onChange={this.onChangeHandler3} before={<Icon24CameraOutline />} size="l">
+									<File stretched onChange={this.onChangeHandler3} before={<Icon24CameraOutline />} size="l">
 										фото 3  {this.state.selectedFile3 ? this.state.selectedFile3.name : 'не выбрано'}
 									</File>
 								</Div>
@@ -227,9 +243,17 @@ class App extends Component {
 											{
 												this.state.result_serv ?
 													// true?
-													<Div style={{ display: 'flex' }}>
-														<Button onClick={this.prevView} stretched before={<Icon24View />} size="l" href='https://ilgiz.h1n.ru/smotrnewpov/index.html'>галерея</Button>
-													</Div> :
+													<div>
+														<Div style={{ display: 'flex' }}>
+															{/* <Button onClick={this.prevView} stretched before={<Icon24View />} size="l" href='https://ilgiz.h1n.ru/smotrnewpov/index.html'>галерея</Button> */}
+															<Button onClick={this.prevView} stretched before={<Icon24View />} size="l" href={`https://ilgiz.h1n.ru/search_new_from_id.php?query=${this.state.result_serv.id}`} >место повреждения</Button>
+															<Button onClick={this.prevView} stretched before={<Icon28MessageAddBadgeOutline />} size="l" href={`https://wa.me/?text=https://ilgiz.h1n.ru/search_new_from_id.php?query=${this.state.result_serv.id}`} >отправить WhatsApp</Button>
+														</Div>
+														<p>(если случайно нажал "очистить всё" просто закрой и открой приложение заново)</p>
+														<Div style={{ display: 'flex' }}>
+															<Button stretched onClick={this.onClear} before={<Icon28ClearDataOutline />} size="l">очистить всё</Button>
+														</Div>
+													</div> :
 													null
 											}
 										</CardGrid>
