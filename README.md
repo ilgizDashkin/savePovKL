@@ -2,7 +2,7 @@
 
 # Create VK Mini App [![npm][npm]][npm-url] [![deps][deps]][deps-url]
 
-## How to install
+## How to install прочти подказка.txt
 
 ### Create VK Mini App with gh-pages deploy
 

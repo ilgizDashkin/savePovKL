@@ -89,53 +89,53 @@ class App extends Component {
 			// if (this.state.selectedFile2) { data.append('foto2', this.state.selectedFile2) }
 			// if (this.state.selectedFile3) { data.append('foto3', this.state.selectedFile3) }	
 
-			function getExifFoto(file_foto1) {
-				// ищем координаты в фото
-				return new Promise((resolve, reject) => {
-					Exif.getData(file_foto1, function () {
-						const allMetaData = Exif.getAllTags(this);
-						// console.log(allMetaData)//вывод всех данных из фото
+			// function getExifFoto(file_foto1) {
+			// 	// ищем координаты в фото не работает в айфоне отключил
+			// 	return new Promise((resolve, reject) => {
+			// 		Exif.getData(file_foto1, function () {
+			// 			const allMetaData = Exif.getAllTags(this);
+			// 			// console.log(allMetaData)//вывод всех данных из фото
 
-						function ConvertDMSToDD(degrees, minutes, seconds, direction) {
-							// приводим координаты к десятичному виду
-							let dd = degrees + (minutes / 60) + (seconds / 3600);
-							if (direction === "S" || direction === "W") {
-								dd = dd * -1;
-							}
-							return dd;
-						}
+			// 			function ConvertDMSToDD(degrees, minutes, seconds, direction) {
+			// 				// приводим координаты к десятичному виду
+			// 				let dd = degrees + (minutes / 60) + (seconds / 3600);
+			// 				if (direction === "S" || direction === "W") {
+			// 					dd = dd * -1;
+			// 				}
+			// 				return dd;
+			// 			}
 
-						const latDegree = allMetaData.GPSLatitude[0];
-						const latMinute = allMetaData.GPSLatitude[1];
-						const latSecond = allMetaData.GPSLatitude[2];
-						const latDirection = allMetaData.GPSLatitudeRef;
+			// 			const latDegree = allMetaData.GPSLatitude[0];
+			// 			const latMinute = allMetaData.GPSLatitude[1];
+			// 			const latSecond = allMetaData.GPSLatitude[2];
+			// 			const latDirection = allMetaData.GPSLatitudeRef;
 
-						const latFinal = ConvertDMSToDD(latDegree, latMinute, latSecond, latDirection);
-						// console.log(latFinal);
+			// 			const latFinal = ConvertDMSToDD(latDegree, latMinute, latSecond, latDirection);
+			// 			// console.log(latFinal);
 
-						// Calculate longitude decimal
-						const lonDegree = allMetaData.GPSLongitude[0];
-						const lonMinute = allMetaData.GPSLongitude[1];
-						const lonSecond = allMetaData.GPSLongitude[2];
-						const lonDirection = allMetaData.GPSLongitudeRef;
+			// 			// Calculate longitude decimal
+			// 			const lonDegree = allMetaData.GPSLongitude[0];
+			// 			const lonMinute = allMetaData.GPSLongitude[1];
+			// 			const lonSecond = allMetaData.GPSLongitude[2];
+			// 			const lonDirection = allMetaData.GPSLongitudeRef;
 
-						const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
-						// console.log(lonFinal);
-						let dateStamp = ''
-						if (allMetaData.DateTime) {
-							dateStamp = allMetaData.DateTime.slice(0, 10)//возьмем 10 символов из даты
-							data.append('date', dateStamp)//добавляем в форму
-						}
-						data.append('gps', `${latFinal},${lonFinal}`)//добавляем в форму
+			// 			const lonFinal = ConvertDMSToDD(lonDegree, lonMinute, lonSecond, lonDirection);
+			// 			// console.log(lonFinal);
+			// 			let dateStamp = ''
+			// 			if (allMetaData.DateTime) {
+			// 				dateStamp = allMetaData.DateTime.slice(0, 10)//возьмем 10 символов из даты
+			// 				data.append('date', dateStamp)//добавляем в форму
+			// 			}
+			// 			data.append('gps', `${latFinal},${lonFinal}`)//добавляем в форму
 
-						resolve(`Gps data ${latFinal},${lonFinal}, dateStamp ${dateStamp}`);//выводим в случае успеха
-						reject(`Gps data error `)//выводим в случае неудачи
-					});
-				}).then(
-					response => console.log(`Exif : ${response}`),
-					error => console.log(`Not Exif: ${error}`)
-				);
-			}
+			// 			resolve(`Gps data ${latFinal},${lonFinal}, dateStamp ${dateStamp}`);//выводим в случае успеха
+			// 			reject(`Gps data error `)//выводим в случае неудачи
+			// 		});
+			// 	}).then(
+			// 		response => console.log(`Exif : ${response}`),
+			// 		error => console.log(`Not Exif: ${error}`)
+			// 	);
+			// }
 
 			function compressFoto(file, fileName) {
 				// сжимаем фото2 и добавляем в форму с помощью промисов
@@ -162,7 +162,7 @@ class App extends Component {
 			};
 
 			Promise.all([
-				getExifFoto(this.state.selectedFile1),
+				// getExifFoto(this.state.selectedFile1),//отключу ексиф из-за айфона
 				compressFoto(this.state.selectedFile1, 'foto1'),
 				compressFoto(this.state.selectedFile2, 'foto2'),
 				compressFoto(this.state.selectedFile3, 'foto3')
