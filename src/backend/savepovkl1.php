@@ -26,10 +26,10 @@ if (isset($_POST['name'])) {
         $json['file1exif'] =  "Не найдено данных заголовка в фото1 . ";
         $json['file1geo'] = "Нет геотегов в фото1. ";
     }
-
+    $name_foto = str_replace('/', '_', $_POST['name']); //убираем недопустимый символ в имени файла
     if (!empty($_POST['foto1'])) {
         // использум этот способ если посылаем изображение в виде base64 строки
-        $name_foto1 = str_replace(' ', '', 'foto/' . date("Y-m-d-H-i") . $_POST['name'] . '_foto1.jpg'); //место где сохраним
+        $name_foto1 = str_replace(' ', '', 'foto/' . date("Y-m-d-H-i") . $name_foto . '_foto1.jpg'); //место где сохраним
         file_put_contents($name_foto1, file_get_contents($_POST['foto1']));
         $json['file1'] = "Файл 1 загружен. ";
     } else {
@@ -38,7 +38,7 @@ if (isset($_POST['name'])) {
 
     if (!empty($_POST['foto2'])) {
         // использум этот способ если посылаем изображение в виде base64 строки
-        $name_foto2 = str_replace(' ', '', 'foto/' . date("Y-m-d-H-i") . $_POST['name'] . '_foto2.jpg'); //место где сохраним
+        $name_foto2 = str_replace(' ', '', 'foto/' . date("Y-m-d-H-i") . $name_foto . '_foto2.jpg'); //место где сохраним
         file_put_contents($name_foto2, file_get_contents($_POST['foto2']));
         $json['file2'] = "Файл 2 загружен. ";
     } else {
@@ -46,7 +46,7 @@ if (isset($_POST['name'])) {
     }
 
     if (!empty($_POST['foto3'])) {
-        $name_foto3 = str_replace(' ', '', 'foto/' . date("Y-m-d-H-i") . $_POST['name'] . '_foto3.jpg');
+        $name_foto3 = str_replace(' ', '', 'foto/' . date("Y-m-d-H-i") . $name_foto . '_foto3.jpg');
         file_put_contents($name_foto3, file_get_contents($_POST['foto3']));
         $json['file3'] = "Файл 3 загружен. ";
     } else {
